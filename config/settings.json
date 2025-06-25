@@ -1,0 +1,19 @@
+{
+    "default_tools": {
+        "nmap": {
+            "command": "nmap",
+            "default_args": "-sV -sC -T4"
+        },
+        "nikto": {
+            "command": "nikto",
+            "default_args": "-h {target}"
+        },
+        "whatweb": {
+            "command": "whatweb",
+            "default_args": "--color=never --no-errors -a 3"
+        }
+    },
+    "output_dir": "output/reports",
+    "log_file": "netmaptool.log",
+    "log_level": "INFO"
+}
