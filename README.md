@@ -10,6 +10,7 @@ A Python-based tool for network scanning and enumeration that wraps common secur
 - **Parallel Execution**: Run multiple scans concurrently for efficiency
 - **Structured Output**: Results saved in JSON format for easy processing
 - **Logging**: Comprehensive logging for debugging and audit purposes
+- **Graphical User Interface**: Modern GUI for easy interaction and result visualization
 
 ## Requirements
 
@@ -23,6 +24,7 @@ A Python-based tool for network scanning and enumeration that wraps common secur
 ## Installation
 
 1. Clone the repository:
+
    ```bash
    git clone <repository-url>
    cd netmaptool
@@ -35,24 +37,47 @@ A Python-based tool for network scanning and enumeration that wraps common secur
 
 ## Usage
 
+### Command Line Interface
+
 Basic usage:
+
 ```bash
 python main.py <target> [options]
 ```
 
+### Graphical User Interface
+
+For a user-friendly interface, run the GUI:
+
+```bash
+python run_gui.py
+```
+
+The GUI provides:
+
+- Easy target input and tool selection
+- Real-time scan progress monitoring
+- Live log output
+- Results visualization in both summary and raw JSON formats
+- Export functionality for scan results
+- Direct access to results folder
+
 ### Examples
 
 1. Basic Nmap scan:
+
    ```bash
    python main.py example.com --tools nmap
    ```
 
 2. Full scan with all tools:
+
    ```bash
    python main.py example.com --tools nmap nikto whatweb
    ```
 
 3. Custom Nmap arguments:
+
    ```bash
    python main.py 192.168.1.1 --tools nmap --nmap-args "-sS -T4 -p 80,443,8080"
    ```

@@ -3,18 +3,20 @@ import json
 import tempfile
 import os
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import time
 
 from utils.logger import get_logger
 
 logger = get_logger()
 
+
 class WhatWebScanner:
     def __init__(self, target: str, output_dir: str = "output/reports"):
         self.target = self._normalize_target(target)
         self.output_dir = output_dir
-        self.output_file = Path(self.output_dir) / f"whatweb_scan_{self.target.replace('/', '_')}.json"
+        self.output_file = Path(
+            self.output_dir) / f"whatweb_scan_{self.target.replace('/', '_')}.json"
         self.results = {
             'target': self.target,
             'scan_results': {},
@@ -43,13 +45,13 @@ class WhatWebScanner:
             if arguments:
                 cmd.extend(arguments.split())
             cmd.append(self.target)
-            
+
             logger.info(f"Running: {' '.join(cmd)}")
-            
+
             # Update status
             self.results['status'] = 'running'
             self.results['start_time'] = time.strftime('%Y-%m-%d %H:%M:%S')
-            
+
             # Execute
             process = subprocess.Popen(
                 cmd,
@@ -57,10 +59,10 @@ class WhatWebScanner:
                 stderr=subprocess.PIPE,
                 text=True
             )
-            
+
             # Wait for completion
             stdout, stderr = process.communicate()
-            
+
             # Handle errors
             if process.returncode != 0:
                 error_msg = f"WhatWeb error: {stderr}"
@@ -68,37 +70,37 @@ class WhatWebScanner:
                 self.results['error'] = error_msg
                 self.results['status'] = 'failed'
                 return self.results
-            
+
             # Parse results
             self._parse_results(temp_path)
-            
+
             # Cleanup
             try:
                 os.unlink(temp_path)
             except:
                 pass
-            
+
             self.results['status'] = 'completed'
             self.results['end_time'] = time.strftime('%Y-%m-%d %H:%M:%S')
-            
+
             return self.results
-            
+
         except Exception as e:
             error_msg = f"Error in WhatWeb scan: {str(e)}"
             logger.error(error_msg)
             self.results['error'] = error_msg
             self.results['status'] = 'failed'
             return self.results
-    
+
     def _parse_results(self, file_path: str) -> None:
         """Parse WhatWeb JSON output"""
         try:
             with open(file_path, 'r') as f:
                 data = json.load(f)
-            
+
             if not isinstance(data, list) or not data:
                 return
-                
+
             # Extract relevant info from first result
             result = data[0]
             self.results['scan_results'] = {
@@ -108,12 +110,12 @@ class WhatWebScanner:
                 'technologies': self._extract_technologies(result.get('plugins', {})),
                 'headers': result.get('headers', {})
             }
-            
+
         except Exception as e:
             error_msg = f"Error parsing WhatWeb results: {str(e)}"
             logger.error(error_msg)
             self.results['error'] = error_msg
-    
+
     def _extract_technologies(self, plugins: Dict) -> Dict[str, List[str]]:
         """Extract technology information from plugins"""
         tech = {}
@@ -128,7 +130,7 @@ class WhatWebScanner:
                 if isinstance(data.get('string'), list):
                     tech[name].extend([s for s in data['string'] if s])
         return tech
-    
+
     def save_results(self, output_file: Optional[str] = None) -> str:
         """Save scan results to JSON file"""
         try:
@@ -136,23 +138,24 @@ class WhatWebScanner:
                 output_file = self.output_file
             else:
                 output_file = Path(output_file)
-            
+
             with open(output_file, 'w') as f:
                 json.dump(self.results, f, indent=2)
-            
+
             logger.info(f"Results saved to {output_file}")
             return str(output_file)
-            
+
         except Exception as e:
             error_msg = f"Error saving results: {str(e)}"
             logger.error(error_msg)
             raise Exception(error_msg)
 
+
 # Example usage
 if __name__ == "__main__":
     import sys
     target = sys.argv[1] if len(sys.argv) > 1 else "example.com"
-    
+
     scanner = WhatWebScanner(target)
     results = scanner.run_scan()
     output_file = scanner.save_results()

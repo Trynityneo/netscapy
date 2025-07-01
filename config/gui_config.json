@@ -1,0 +1,29 @@
+{
+  "window": {
+    "title": "Netscapy - Network Scanning Tool",
+    "default_width": 1200,
+    "default_height": 800,
+    "min_width": 1000,
+    "min_height": 600
+  },
+  "scanning": {
+    "default_tools": ["nmap"],
+    "max_workers": 3,
+    "auto_refresh_interval": 100
+  },
+  "display": {
+    "log_max_lines": 1000,
+    "log_font": "Consolas",
+    "log_font_size": 9,
+    "results_font": "Consolas",
+    "results_font_size": 9
+  },
+  "output": {
+    "default_directory": "output/reports",
+    "export_formats": ["json", "txt"]
+  },
+  "themes": {
+    "default": "clam",
+    "available": ["clam", "alt", "default", "classic"]
+  }
+}
