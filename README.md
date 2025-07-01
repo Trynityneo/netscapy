@@ -9,6 +9,7 @@ A Python-based tool for network scanning and enumeration that wraps common secur
 - **Web Technology Detection**: Using WhatWeb to fingerprint web technologies
 - **Parallel Execution**: Run multiple scans concurrently for efficiency
 - **Structured Output**: Results saved in JSON format for easy processing
+- **Plain Text Output**: Nmap results are also saved as human-readable .txt files
 - **Logging**: Comprehensive logging for debugging and audit purposes
 - **Graphical User Interface**: Modern GUI for easy interaction and result visualization
 
@@ -118,11 +119,17 @@ Scan results are saved in the specified output directory (default: `output/repor
 ```
 output/
 └── reports/
-    ├── nmap_results_<target>.json
+    ├── nmap_scan_<target>.txt         # Nmap plain text output (human-readable)
+    ├── nmap_scan_<target>.json        # Nmap JSON output (metadata + raw text)
     ├── nikto_results_<target>.json
     ├── whatweb_results_<target>.json
     └── combined_results_<target>.json
 ```
+
+- **Nmap Output:**
+  - `.txt`: The full, human-readable Nmap output as you would see in the terminal.
+  - `.json`: Contains metadata (status, file path, errors) and the raw text output for programmatic use.
+  - **No XML files are generated or used.**
 
 ## License
 
