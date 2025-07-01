@@ -13,6 +13,10 @@ A Python-based tool for network scanning and enumeration that wraps common secur
 - **Logging**: Comprehensive logging for debugging and audit purposes
 - **Graphical User Interface**: Modern GUI for easy interaction and result visualization
 
+## GUI Screenshot
+
+![Netscapy GUI Screenshot](images/netscapy_gui.png)
+
 ## Requirements
 
 - Python 3.10+
