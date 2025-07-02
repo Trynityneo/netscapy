@@ -14,6 +14,7 @@ from pathlib import Path
 from datetime import datetime
 import queue
 import time
+import re
 
 # Import the main scanner
 from main import NetworkScanner, TOOL_REGISTRY
@@ -492,23 +493,19 @@ class ScannerGUI:
                 in_ports = True
                 continue
             if in_ports:
-                if not line.strip() or line.startswith("Nmap done"):
+                if not line.strip() or line.startswith("Nmap done") or line.startswith("#"):
                     break
-                # Example line: 80/tcp   open  http    Apache httpd 2.4.41 ((Ubuntu))
-                parts = line.split()
-                if len(parts) >= 3:
-                    port_proto = parts[0].split("/")
-                    port = port_proto[0]
-                    proto = port_proto[1] if len(port_proto) > 1 else ''
-                    state = parts[1]
-                    service = parts[2]
-                    version = ' '.join(parts[3:]) if len(parts) > 3 else ''
+                # Use regex to match: <port>/<proto> <state> <service> <version...>
+                m = re.match(
+                    r"^(\d+)/(\w+)\s+(\w+)\s+(\S+)(\s+.+)?$", line.strip())
+                if m:
+                    port, proto, state, service, version = m.groups()
                     ports.append({
                         "port": port,
                         "protocol": proto,
                         "state": state,
                         "service": service,
-                        "version": version
+                        "version": (version or "").strip()
                     })
         return ports
 

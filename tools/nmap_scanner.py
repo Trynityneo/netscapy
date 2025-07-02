@@ -55,6 +55,9 @@ class NmapScanner:
             self.results['status'] = 'completed' if process.returncode == 0 else 'failed'
             self.results['error'] = stderr if process.returncode != 0 else None
 
+            # Parse ports from raw_output and add to results
+            self.results['ports'] = self.parse_nmap_ports(raw_output)
+
             # Save JSON
             with open(self.json_output_file, 'w') as f:
                 json.dump(self.results, f, indent=2)
@@ -72,6 +75,29 @@ class NmapScanner:
             with open(self.json_output_file, 'w') as f:
                 json.dump(self.results, f, indent=2)
             return self.results
+
+    def parse_nmap_ports(self, raw_output):
+        import re
+        ports = []
+        in_ports = False
+        for line in raw_output.splitlines():
+            if line.strip().startswith("PORT"):
+                in_ports = True
+                continue
+            if in_ports:
+                if not line.strip() or line.startswith("Nmap done") or line.startswith("#"):
+                    break
+                m = re.match(r"^(\d+)/(\w+)\s+(\w+)\s+(\S+)(\s+.+)?$", line.strip())
+                if m:
+                    port, proto, state, service, version = m.groups()
+                    ports.append({
+                        "port": port,
+                        "protocol": proto,
+                        "state": state,
+                        "service": service,
+                        "version": (version or "").strip()
+                    })
+        return ports
 
     def save_results(self, output_file: Optional[str] = None) -> str:
         """
