@@ -175,6 +175,11 @@ class ScannerGUI:
         )
         self.summary_text.pack(fill='both', expand=True)
 
+        # Ports / Hosts tab
+        self.ports_frame = ttk.Frame(self.results_notebook)
+        self.results_notebook.add(self.ports_frame, text="Ports / Hosts")
+        self.create_ports_table(self.ports_frame)
+
         # Raw JSON tab
         self.raw_frame = ttk.Frame(self.results_notebook)
         self.results_notebook.add(self.raw_frame, text="Raw JSON")
@@ -351,6 +356,9 @@ class ScannerGUI:
             self.raw_text.delete("1.0", tk.END)
             self.raw_text.insert("1.0", json.dumps(results, indent=2))
 
+            # Update ports table
+            self.update_ports_table(results)
+
             # Update UI
             self.scan_button.config(state='normal')
             self.stop_button.config(state='disabled')
@@ -433,6 +441,63 @@ class ScannerGUI:
             os.startfile(str(results_dir.absolute()))
         else:
             messagebox.showinfo("Info", "Results folder does not exist yet")
+
+    def create_ports_table(self, parent):
+        columns = ("Port", "Protocol", "State", "Service", "Version")
+        self.ports_table = ttk.Treeview(
+            parent, columns=columns, show="headings", height=10)
+        for col in columns:
+            self.ports_table.heading(col, text=col)
+            self.ports_table.column(col, width=100, anchor="center")
+        self.ports_table.pack(fill="both", expand=True)
+
+    def update_ports_table(self, results):
+        # Clear previous rows
+        for row in getattr(self, 'ports_table', []).get_children():
+            self.ports_table.delete(row)
+        # Find Nmap results
+        scans = results.get('scans', {})
+        nmap = scans.get('nmap', {})
+        nmap_ports = nmap.get('ports', [])
+        # If ports are not directly available, try to parse from nmap output (if present)
+        if not nmap_ports and 'raw_output' in nmap:
+            nmap_ports = self.parse_nmap_ports(nmap['raw_output'])
+        for entry in nmap_ports:
+            self.ports_table.insert("", "end", values=(
+                entry.get("port", ""),
+                entry.get("protocol", ""),
+                entry.get("state", ""),
+                entry.get("service", ""),
+                entry.get("version", "")
+            ))
+
+    def parse_nmap_ports(self, raw_output):
+        ports = []
+        in_ports = False
+        for line in raw_output.splitlines():
+            if line.strip().startswith("PORT"):
+                in_ports = True
+                continue
+            if in_ports:
+                if not line.strip() or line.startswith("Nmap done"):
+                    break
+                # Example line: 80/tcp   open  http    Apache httpd 2.4.41 ((Ubuntu))
+                parts = line.split()
+                if len(parts) >= 3:
+                    port_proto = parts[0].split("/")
+                    port = port_proto[0]
+                    proto = port_proto[1] if len(port_proto) > 1 else ''
+                    state = parts[1]
+                    service = parts[2]
+                    version = ' '.join(parts[3:]) if len(parts) > 3 else ''
+                    ports.append({
+                        "port": port,
+                        "protocol": proto,
+                        "state": state,
+                        "service": service,
+                        "version": version
+                    })
+        return ports
 
 
 def main():
