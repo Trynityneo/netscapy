@@ -459,9 +459,22 @@ class ScannerGUI:
         scans = results.get('scans', {})
         nmap = scans.get('nmap', {})
         nmap_ports = nmap.get('ports', [])
-        # If ports are not directly available, try to parse from nmap output (if present)
+        # If ports are not directly available, try to parse from nmap raw_output (handle escaped newlines)
         if not nmap_ports and 'raw_output' in nmap:
-            nmap_ports = self.parse_nmap_ports(nmap['raw_output'])
+            raw = nmap['raw_output']
+            # Handle both double and single backslash newlines
+            if '\\n' in raw:
+                raw = raw.replace('\\n', '\n')
+            if '\n' in raw:
+                raw = raw.replace('\n', '\n')
+            nmap_ports = self.parse_nmap_ports(raw)
+        # Fallback: If still no ports, try parsing from txt_file if available
+        if not nmap_ports and 'txt_file' in nmap:
+            txt_path = nmap['txt_file']
+            if os.path.exists(txt_path):
+                with open(txt_path, 'r') as f:
+                    txt_content = f.read()
+                nmap_ports = self.parse_nmap_ports(txt_content)
         for entry in nmap_ports:
             self.ports_table.insert("", "end", values=(
                 entry.get("port", ""),
