@@ -28,10 +28,22 @@ A Python-based tool for network scanning and enumeration that wraps common secur
 
 ## Installation
 
+### Option 1: Simple Installer (Recommended)
+
+Run the automated installer:
+
+```bash
+python install_gui.py
+```
+
+This will automatically install all dependencies and set up the environment.
+
+### Option 2: Manual Installation
+
 1. Clone the repository:
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Trynityneo/netscapy.git
    cd netmaptool
    ```
 
